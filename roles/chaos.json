@@ -5,6 +5,9 @@
   "json_class": "Chef::Role",
   "description": "Install Chaos stack.",
   "chef_type": "role",
-  "run_list": [ "recipe[nginx]" ]
+  "run_list": [ 
+    "recipe[nginx]",
+    "recipe[chaos]"
+   ]
 }
 
