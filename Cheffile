@@ -4,6 +4,7 @@
 site 'http://community.opscode.com/api/v1'
 
 cookbook 'nginx'
+cookbook 'postgresql'
 
 # cookbook 'apache2', '>= 1.0.0'
 

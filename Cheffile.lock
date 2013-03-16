@@ -9,8 +9,12 @@ SITE
       ohai (>= 1.1.4)
       yum (>= 0.0.0)
     ohai (1.1.8)
+    openssl (1.0.2)
+    postgresql (2.2.2)
+      openssl (>= 0.0.0)
     yum (2.1.0)
 
 DEPENDENCIES
   nginx (>= 0)
+  postgresql (>= 0)
 
