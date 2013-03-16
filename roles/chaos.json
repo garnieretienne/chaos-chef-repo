@@ -7,7 +7,7 @@
   "chef_type": "role",
   "run_list": [ 
     "recipe[nginx]",
-    "recipe[postgresql]"'
+    "recipe[postgresql]",
     "recipe[chaos]"
    ]
 }
