@@ -1,0 +1,125 @@
+#!/bin/bash
+# git ALL=(%deploy) SETENV: NOPASSWD: /srv/git/bin/starter2
+# git ALL=(%deploy) NOPASSWD: /bin/kill *
+
+# Source profile to access rbenv (needed by mason)
+source ~/.profile
+app=$1
+
+DEPLOY_USER=git
+DEPLOY_GROUP=deploy
+STARTER_PATH=/srv/git/bin/starter2
+BUILD_DIR=/tmp/$app                          # Where app's build dir are stored
+GIT_REPO=~/repositories/${app}.git           # Where git bare repo are stored
+APP_HOME=/srv/app/$app                       # Where apps are stored
+CACHE_DIR=$APP_HOME/cache
+PACKAGES_DIR=$APP_HOME/packages
+
+# Create the app build dir.
+# Clone a fresh copy of the app sources.
+create_build_dir(){
+  if [ -d "$BUILD_DIR" ]; then
+    rm -rf $BUILD_DIR
+  fi
+  git clone $GIT_REPO $BUILD_DIR &> /dev/null
+  rm -rf $BUILD_DIR/.git
+  rm -f $BUILD_DIR/.gitignore
+}
+
+# Destroy the app build dir.
+destroy_build_dir(){
+  rm -rf $BUILD_DIR
+}
+
+# Find the build version number.
+# Set the `build_version` var.
+find_next_version_number(){
+  build_number=$(( $(ls $PACKAGES_DIR | grep "^v[0-9]*" | wc -l)+1 ))
+  while ls "${PACKAGES_DIR}/v${build_number}" &> /dev/null; do
+    build_number=$(( $build_number+1 ))
+  done
+  build_version="v${build_number}"
+}
+
+# Build the app package.
+# Run buildpack and set permissions to be able to start the app.
+build_app(){
+  package_dir=$PACKAGES_DIR/$build_version
+  create_build_dir
+  mason build $BUILD_DIR -o $package_dir -t dir -c $CACHE_DIR -q
+  chown -R $DEPLOY_USER:$DEPLOY_GROUP $package_dir
+  chmod -R 775 $package_dir
+  destroy_build_dir
+}
+
+# Start the app.
+# Run app processes stored in the Procfile.
+start_app(){
+  cd $package_dir
+  sudo -u $app HOME=$package_dir $STARTER_PATH
+  sleep 1
+}
+
+# Update NGINX route
+# TODO: find how to get the domain name (~/config ?).
+update_route(){
+  local backends=( )
+  domain=$(cat $APP_HOME/.domain)
+  while read port; do
+    backends=( "${backends[@]}" "127.0.0.1:${port}" )
+  done < "$package_dir/tmp/ports"
+  if (( ${#backends[@]} > 0 )); then
+    hermes update $app $domain --upstream "${backends[@]}" -d /srv/git/routes > /dev/null
+  fi
+}
+
+# Stop old running version and update the current link to 
+# the running package dir.
+update_running_version(){
+  if [ -f $PACKAGES_DIR/current/tmp/pids/starter.pid ]; then
+    sudo -u $app kill `cat $PACKAGES_DIR/current/tmp/pids/starter.pid` &> /dev/null
+  fi
+  rm -f $PACKAGES_DIR/current
+  ln -s $package_dir $PACKAGES_DIR/current
+}
+
+# Some test
+test(){
+  echo TEST [create_build_dir]
+  create_build_dir
+
+  echo TEST [destroy_build_dir]
+  destroy_build_dir
+
+  echo TEST [find_next_version_number]
+  find_next_version_number
+  echo "version: $build_version"
+
+  echo TEST [build_app]
+  find_next_version_number
+  build_app
+
+  echo TEST [start_app]
+  start_app
+  sleep 1
+  echo "Ports:"
+  cat $package_dir/tmp/ports
+
+  echo TEST [update_route]
+  update_route
+
+  echo TEST [update_running_version]
+  update_running_version
+}
+#test
+
+find_next_version_number
+echo "> Deploying $app $build_version"
+echo "> Building app..."
+build_app
+echo "> Lauching..."
+start_app
+update_route
+update_running_version
+echo "> Application $app $build_version deployed."
+echo "  http://${domain}"

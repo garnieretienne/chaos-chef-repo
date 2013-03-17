@@ -1,0 +1,198 @@
+#!/bin/bash
+#
+# Start processes stored in a Procfile (current dir).
+# HOME env variable must be the app root. (start with "HOME=`pwd` starter" if needed).
+# Support for .env file (foreman format).
+# Support for profile.d scripts.
+# Support for $PORT env variable.
+
+# Log sdout and sderr to log file.
+exec &>> $HOME/log/starter.log
+
+# Log a message.
+# All message are send to logfile (log/starter.log).
+# Arguments:
+#   message: message to log
+log(){
+  local message=$1
+  echo $message
+}
+
+# Create needed directory if they don't exist.
+# Directories:
+#   tmp/pids/
+#   log/
+#   tmp/ports (file)
+create_needed_dirs(){
+  mkdir -p $HOME/tmp/pids && chmod 755 $HOME/tmp/pids
+  mkdir -p $HOME/log
+  rm -f $HOME/tmp/ports && touch $HOME/tmp/ports && chmod 755 $HOME/tmp/ports # erase ports file at startup if exist
+}
+
+# Source profile defined by buildpacks.
+# TODO: profile are normaly stored in `.profile.d`.
+load_profile(){
+  source $HOME/.profile.d/*
+}
+
+# Subshell PID storage.
+# Store a pid into the sub_pids array.
+# Arguments: 
+#   pid: pid to store in memory
+sub_pids=( )
+store_pid(){
+  local pid=$1
+  sub_pids=( "${sub_pids[@]}" "$pid" )
+}
+
+# Application ports storage.
+# Store port number into ports file (tmp/ports).
+# Arguments:
+#   port: port to store
+ports=( )
+store_port(){
+  local port=$1
+  echo $port >> $HOME/tmp/ports
+}
+
+# Tell if a port is available or not.
+# Use netstat to find if a port is already used.
+# Parameters:
+#   port: to to test
+port_available(){
+  local port=$1
+  if cat $HOME/tmp/ports | grep "$port" &> /dev/null; then
+    return 1
+  elif netstat -atwn | grep "^.*:${port}.*:\*\s*LISTEN\s*$" &> /dev/null; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+# Get a free port.
+# Return an available port.
+# Store assigned port into port array.
+get_free_port(){
+  local port=3000
+  until port_available $port; do
+    port=$(( ${port} + 1 ))
+  done
+  store_port $port
+  echo $port
+}
+
+# Load env vars stored in env file (foreman format),
+# return a string compatible with the env command.
+# Example:
+#   load_env app/.env #=> "API_TOKEN=XXXXXXXXXXXX S3_BUCKET=awesomeapp"
+# Arguments: 
+#   env_file: env file to load (foreman format)
+load_env(){
+  local env_file=$1
+  local env=""
+  if [ -f "$env_file" ]; then
+    while read line
+    do
+      if [[ "$line" == *=* ]]; then
+        env="${env} ${line}"
+      fi
+    done < "$env_file"
+  fi
+  echo $env
+}
+
+# Start a process in background and store its pid in the sub_pids array.
+# Restart the process if it failed (X times, see relaunch var).
+# If the process name is 'web', an unused port is assigned via the $PORT env variable.
+# Arguments:
+#   name: name of the process
+#   command: command to execute as a process
+#   env: env variables (default: "")
+start_process(){
+  local relaunch=4
+  local name=$1
+  local env=${3:-""}
+  local command="$2"
+
+  if [ "$name" == "web" ]; then
+    local port=$(get_free_port)
+    env="${env} PORT=$port"
+  fi
+  export $env
+
+  log "Start process '$name': '$command'"
+  until eval "$command >> $HOME/log/$1.log 2>&1 &"
+  do
+    local counter=${counter:-0}
+    if (( $counter == relaunch )); then
+      log "Process '$1' crashed to many time.  NOT Respawning..." >&2
+      return 1
+    else
+      counter=$counter+1
+      log "Process '$1' crashed with exit code $?.  Respawning..." >&2
+      sleep 1 
+    fi
+  done
+  store_pid $!
+}
+
+# Start processes stored in the given Procfile using the given env file.
+# Arguments:
+#   procfile: path to the procfile to start
+#   env: path to the env file (default: '.env')
+run_procfile(){
+  local env_file=${2:-'.env'}
+  local env=$(load_env $env_file)
+  local procfile=$1
+  if [ -f "$procfile" ]; then
+    while read line; do
+      local name=${line%%:*}
+      local command=${line#*: }
+      start_process "$name" "$command" "$env"
+    done < "$procfile"
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Bind many env files as one.
+# If one of the file doesn't exist, do nothing about it.
+# If the destination env file exist, erase him.
+# Arguments:
+#   dest: destination env file
+#   $@: env files to parse
+bind_env_files(){
+  local dest=$1
+  shift
+  rm -f $dest
+  for env_file in $@; do
+    if [ -f "$env_file" ]; then
+      cat $env_file >> $dest
+    fi
+  done
+}
+
+# Run processes from the Procfile.
+create_needed_dirs
+(
+log "Start the application..."
+load_profile
+bind_env_files $HOME/app_env $HOME/.env $HOME/../../config/database $HOME/../../config/env
+run_procfile Procfile app_env
+
+# Kill sub-processes if a `SIGINT`, `SIGTERM` is received.
+kill_processes() {
+  log "Stop the application..."
+  log "Sending SIGTERM to all processes (${sub_pids[@]})"
+  kill ${sub_pids[@]} &>/dev/null
+}
+trap kill_processes SIGINT SIGTERM
+
+# Wait for subshell to exit before deleting the PID file and exiting.
+wait
+rm $HOME/tmp/pids/starter.pid
+log "Application stopped."
+) &
+echo $! > $HOME/tmp/pids/starter.pid && chmod 755 $HOME/tmp/pids/starter.pid
