@@ -43,3 +43,14 @@ file "starter" do
   path "/srv/git/bin/starter"
   action :create
 end
+
+# Install system ruby and mason
+package "ruby" do
+  action :install
+end
+package "rubygems" do
+  action :install
+end
+gem_package "mason" do
+  action :install
+end
