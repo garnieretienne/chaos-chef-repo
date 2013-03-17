@@ -16,3 +16,9 @@ template "chaos.conf" do
   mode 00644
   notifies :reload, 'service[nginx]'
 end
+
+# Add the deploy group (used by chaos tools)
+group "deploy" do
+  system true
+  action :create
+end
