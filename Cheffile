@@ -5,6 +5,8 @@ site 'http://community.opscode.com/api/v1'
 
 cookbook 'nginx'
 cookbook 'postgresql'
+cookbook 'gitolite',
+  :git => 'https://github.com/wschultz/cookbook-gitolite.git'
 
 # cookbook 'apache2', '>= 1.0.0'
 
