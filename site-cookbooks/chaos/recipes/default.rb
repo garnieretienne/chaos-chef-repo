@@ -27,19 +27,21 @@ group "deploy" do
 end
 
 # Deployment script
-file "deploy" do
+template "deploy" do
+  path "#{node['gitolite']['admin_home']}/bin/deploy"
+  source "deploy"
   owner "git"
   group "git"
   mode "0755"
-  path "/srv/git/bin/deploy"
   action :create
 end
 
 # Processes starter script
-file "starter" do
+template "starter" do
+  path "#{node['gitolite']['admin_home']}/bin/starter"
+  source "starter"
   owner "git"
   group "git"
   mode "0755"
-  path "/srv/git/bin/starter"
   action :create
 end
