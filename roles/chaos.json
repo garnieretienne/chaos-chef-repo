@@ -7,13 +7,18 @@
       }
     }
   },
-  "override_attributes": { },
+  "override_attributes": { 
+    "gitolite": {
+      "admin_home": "/srv/git"
+    }
+  },
   "json_class": "Chef::Role",
   "description": "Install Chaos stack.",
   "chef_type": "role",
   "run_list": [ 
     "recipe[nginx]",
     "recipe[postgresql::server]",
+    "recipe[gitolite]",
     "recipe[chaos]"
    ]
 }
