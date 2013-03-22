@@ -46,13 +46,7 @@ template "starter" do
   action :create
 end
 
-# Install system ruby and mason, foreman and hermes (chaos route manager) gems
-package "ruby" do
-  action :install
-end
-package "rubygems" do
-  action :install
-end
+# Install mason and foreman gems
 gem_package "foreman" do
   action :install
 end
@@ -67,7 +61,8 @@ execute "add gem binary path to PATH" do
   action :run
   not_if "cat #{node['gitolite']['admin_home']}/.profile | grep \"$(ruby -rubygems -e 'puts Gem.default_bindir')\""
 end
-#TODO: install chaos route manager
+
+# Install chaos route manager gem
 directory "#{node['gitolite']['admin_home']}/build" do
   user "git"
   group "git"

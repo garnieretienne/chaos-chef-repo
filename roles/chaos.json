@@ -8,6 +8,11 @@
     }
   },
   "override_attributes": { 
+    "languages": {
+      "ruby": {
+        "default_version": "1.9.1"
+      }
+    },
     "gitolite": {
       "admin_home": "/srv/git"
     }
@@ -16,6 +21,8 @@
   "description": "Install Chaos stack.",
   "chef_type": "role",
   "run_list": [ 
+    "recipe[ruby]",
+    "recipe[ruby::symlinks]",
     "recipe[nginx]",
     "recipe[postgresql::server]",
     "recipe[gitolite]",
