@@ -46,13 +46,51 @@ template "starter" do
   action :create
 end
 
-# Install system ruby and mason
+# Install system ruby and mason, foreman and hermes (chaos route manager) gems
 package "ruby" do
   action :install
 end
 package "rubygems" do
   action :install
 end
+gem_package "foreman" do
+  action :install
+end
 gem_package "mason" do
   action :install
 end
+execute "add gem binary path to PATH" do
+  command "echo \"PATH=$(ruby -rubygems -e 'puts Gem.default_bindir'):\\$PATH\" >> #{node['gitolite']['admin_home']}/.profile"
+  cwd "#{node['gitolite']['admin_home']}"
+  user "git"
+  group "git"
+  action :run
+  not_if "cat #{node['gitolite']['admin_home']}/.profile | grep \"$(ruby -rubygems -e 'puts Gem.default_bindir')\""
+end
+#TODO: install chaos route manager
+directory "#{node['gitolite']['admin_home']}/build" do
+  user "git"
+  group "git"
+  action :create
+end
+git "hermes source" do
+  repository "git://github.com/garnieretienne/hermes.git"
+  destination "#{node['gitolite']['admin_home']}/build/hermes"
+  user "git"
+  group "git"
+  action :checkout
+end
+execute "build hermes gem" do
+  command "gem build hermes.gemspec"
+  cwd "#{node['gitolite']['admin_home']}/build/hermes"
+  user "git"
+  group "git"
+  action :run
+  not_if "ls #{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
+  notifies :install, "gem_package[hermes]", :immediately
+end
+gem_package "hermes" do
+  source "#{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
+  action :nothing
+end
+
