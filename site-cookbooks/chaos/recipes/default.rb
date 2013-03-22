@@ -7,16 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-# Create the nginx config for chaos
-template "chaos.conf" do
-  path "#{node['nginx']['dir']}/conf.d/chaos.conf"
-  source "chaos.conf.erb"
-  owner "root"
-  group "root"
-  mode 00644
-  notifies :reload, 'service[nginx]'
-end
-
 # Add the deploy group (used by chaos tools)
 # Add git user to deploy group
 group "deploy" do
@@ -53,8 +43,8 @@ end
 gem_package "mason" do
   action :install
 end
-execute "add gem binary path to PATH" do
-  command "echo \"PATH=$(ruby -rubygems -e 'puts Gem.default_bindir'):\\$PATH\" >> #{node['gitolite']['admin_home']}/.profile"
+execute "add gem binary path to PATH and /usr/sbin for git user" do
+  command "echo \"PATH=$(ruby -rubygems -e 'puts Gem.default_bindir'):/usr/sbin:\\$PATH\" >> #{node['gitolite']['admin_home']}/.profile"
   cwd "#{node['gitolite']['admin_home']}"
   user "git"
   group "git"
@@ -62,7 +52,7 @@ execute "add gem binary path to PATH" do
   not_if "cat #{node['gitolite']['admin_home']}/.profile | grep \"$(ruby -rubygems -e 'puts Gem.default_bindir')\""
 end
 
-# Install chaos route manager gem
+# Install chaos route manager gem (move to its own recipe)
 directory "#{node['gitolite']['admin_home']}/build" do
   user "git"
   group "git"
@@ -89,3 +79,27 @@ gem_package "hermes" do
   action :nothing
 end
 
+# Allow git user to manage nginx routes
+directory "#{node['gitolite']['admin_home']}/routes" do
+  user "git"
+  group "git"
+  action :create
+end
+template "hermes sudo conf" do
+  path "/etc/sudoers.d/hermes"
+  source "sudo-hermes"
+  owner "root"
+  group "root"
+  mode "0440"
+  action :create
+end
+
+# Create the nginx config for chaos
+template "chaos.conf" do
+  path "#{node['nginx']['dir']}/conf.d/chaos.conf"
+  source "chaos.conf.erb"
+  owner "root"
+  group "root"
+  mode 00644
+  notifies :reload, 'service[nginx]'
+end

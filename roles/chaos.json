@@ -7,7 +7,13 @@
       }
     }
   },
-  "override_attributes": { 
+  "override_attributes": {
+    "authorization": {
+      "sudo": {
+        "groups": ["sudo"],
+        "include_sudoers_d": true
+      }
+    }, 
     "languages": {
       "ruby": {
         "default_version": "1.9.1"
@@ -20,7 +26,8 @@
   "json_class": "Chef::Role",
   "description": "Install Chaos stack.",
   "chef_type": "role",
-  "run_list": [ 
+  "run_list": [
+    "recipe[sudo]", 
     "recipe[ruby]",
     "recipe[ruby::symlinks]",
     "recipe[nginx]",

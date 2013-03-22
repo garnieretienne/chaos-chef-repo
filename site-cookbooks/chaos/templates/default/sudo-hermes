@@ -1,0 +1,1 @@
+<%= node[:gitolite][:admin_name] %> ALL=NOPASSWD: /usr/sbin/nginx -s reload -c *
