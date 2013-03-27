@@ -2,7 +2,7 @@
 # Cookbook Name:: chaos
 # Recipe:: default
 #
-# Copyright 2013, YOUR_COMPANY_NAME
+# Copyright 2013, Etienne Garnier
 #
 # All rights reserved - Do Not Redistribute
 #
@@ -73,6 +73,11 @@ end
 directory "#{node['gitolite']['admin_home']}/bin" do
   user "git"
   group "git"
+  action :create
+end
+
+# Create the app folder (sourced by default profile on debian / ubuntu)
+directory "#{node['chaos']['app']['dir']}" do
   action :create
 end
 
