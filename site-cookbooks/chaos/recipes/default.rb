@@ -16,6 +16,13 @@ group "deploy" do
   action :create
 end
 
+# Create the bin folder (sourced by default profile on debian / ubuntu)
+directory "#{node['gitolite']['admin_home']}/bin" do
+  user "git"
+  group "git"
+  action :create
+end
+
 # Deployment script
 template "deploy" do
   path "#{node['gitolite']['admin_home']}/bin/deploy"
