@@ -91,6 +91,16 @@ template "deploy" do
   action :create
 end
 
+# Deployment hook
+template "post-update" do
+  path "#{node['gitolite']['admin_home']}/.gitolite/hooks/common/post-update"
+  source "post-update"
+  owner "git"
+  group "git"
+  mode "0755"
+  action :create
+end
+
 # Processes starter script
 template "starter" do
   path "#{node['gitolite']['admin_home']}/bin/starter"
