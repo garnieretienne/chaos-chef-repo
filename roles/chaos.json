@@ -28,6 +28,7 @@
   "chef_type": "role",
   "run_list": [
     "recipe[sudo]", 
+    "recipe[build-essential]",
     "recipe[ruby]",
     "recipe[ruby::symlinks]",
     "recipe[nginx]",
