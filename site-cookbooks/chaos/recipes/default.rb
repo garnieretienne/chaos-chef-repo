@@ -156,7 +156,7 @@ execute "build hermes gem" do
   group "git"
   action :run
   not_if "ls #{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
-  notifies :install, "rbenv_gem[hermes]", :immediately
+  #notifies :install, "rbenv_gem[hermes]", :immediately
 end
 
 # Allow git user to manage nginx routes
