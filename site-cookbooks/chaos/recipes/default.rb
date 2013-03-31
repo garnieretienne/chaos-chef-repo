@@ -7,6 +7,11 @@
 # All rights reserved - Do Not Redistribute
 #
 
+# Define the default ruby verion on the system
+rbenv_global "1.9.3-p392" do
+  action :create
+end
+
 # Create an admin user
 admin_key = "/root/admin_key"
 if Dir.exist? admin_key then
