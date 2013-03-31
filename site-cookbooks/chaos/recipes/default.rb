@@ -145,6 +145,10 @@ git "hermes source" do
   group "git"
   action :checkout
 end
+rbenv_gem "hermes" do
+  source "#{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
+  action :nothing
+end
 execute "build hermes gem" do
   command "gem build hermes.gemspec"
   cwd "#{node['gitolite']['admin_home']}/build/hermes"
@@ -153,10 +157,6 @@ execute "build hermes gem" do
   action :run
   not_if "ls #{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
   notifies :install, "rbenv_gem[hermes]", :immediately
-end
-rbenv_gem "hermes" do
-  source "#{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
-  action :nothing
 end
 
 # Allow git user to manage nginx routes
