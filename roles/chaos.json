@@ -32,8 +32,8 @@
   "run_list": [
     "recipe[sudo]", 
     "recipe[build-essential]",
-    "recipe[rbenv::system]",
     "recipe[ruby_build]",
+    "recipe[rbenv::system]",
     "recipe[nginx]",
     "recipe[postgresql::server]",
     "recipe[gitolite]",
