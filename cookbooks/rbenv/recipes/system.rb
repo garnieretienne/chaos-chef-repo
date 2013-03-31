@@ -1,10 +1,8 @@
 #
 # Cookbook Name:: rbenv
-# Resource:: ruby
+# Recipe:: system
 #
-# Author:: Fletcher Nichol <fnichol@nichol.ca>
-#
-# Copyright 2011, Fletcher Nichol
+# Copyright 2010, 2011 Fletcher Nichol
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,18 +17,24 @@
 # limitations under the License.
 #
 
-actions :install, :reinstall
+include_recipe "rbenv::system_install"
 
-attribute :definition,  :kind_of => String, :name_attribute => true
-attribute :root_path,   :kind_of => String
-attribute :user,        :kind_of => String
-
-def initialize(*args)
-  super
-  @action = :install
-  @rbenv_version = @definition
+Array(node['rbenv']['rubies']).each do |rubie|
+  rbenv_ruby rubie
 end
 
-def to_s
-  "#{super} (#{@user || 'system'})"
+if node['rbenv']['global']
+  rbenv_global node['rbenv']['global']
+end
+
+node['rbenv']['gems'].each_pair do |rubie, gems|
+  Array(gems).each do |gem|
+    rbenv_gem gem['name'] do
+      rbenv_version rubie
+
+      %w{version action options source}.each do |attr|
+        send(attr, gem[attr]) if gem[attr]
+      end
+    end
+  end
 end

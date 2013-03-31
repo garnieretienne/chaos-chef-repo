@@ -1,10 +1,8 @@
-.vagrant
-Berksfile.lock
 Gemfile.lock
-*~
-*#
-.#*
-\#*#
-.*.sw[a-z]
-*.un~
-/cookbooks
+Berksfile.lock
+.vagrant
+.bundle/
+tmp/
+.vagrant
+.jamie/
+.jamie.local.yml

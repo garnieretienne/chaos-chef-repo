@@ -1,20 +1,21 @@
 name             "rbenv"
-maintainer       "Riot Games"
-maintainer_email "jamie@vialstudios.com"
+maintainer       "Fletcher Nichol"
+maintainer_email "fnichol@nichol.ca"
 license          "Apache 2.0"
-description      "Installs and configures rbenv"
-version          "1.4.1"
+description      "Manages rbenv and its installed rubies. Several LWRPs are also defined."
+long_description "Please refer to README.md (it's long)."
+version          "0.7.2"
 
-recipe "rbenv", "Installs and configures rbenv"
-recipe "rbenv::ruby_build", "Installs and configures ruby_build"
-recipe "rbenv::ohai_plugin", "Installs an rbenv Ohai plugin to populate automatic_attrs about rbenv and ruby_build"
+recommends "ruby_build"       # if using the rbenv_ruby LWRP, ruby-build must be installed
+recommends "java", "> 1.4.0"  # if using jruby, java is required on system
 
-%w{ centos redhat fedora ubuntu debian }.each do |os|
-  supports os
-end
-
-%w{ git }.each do |cb|
-  depends cb
-end
-
-depends 'ohai', '>= 1.1'
+supports "ubuntu"
+supports "debian"
+supports "freebsd"
+supports "redhat"
+supports "centos"
+supports "fedora"
+supports "amazon"
+supports "scientific"
+supports "suse"
+supports "mac_os_x"
