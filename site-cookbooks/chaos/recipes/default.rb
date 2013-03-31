@@ -152,7 +152,7 @@ execute "build hermes gem" do
   group "git"
   action :run
   not_if "ls #{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
-  notifies :install, "gem_package[hermes]", :immediately
+  notifies :install, "rbenv_gem[hermes]", :immediately
 end
 rbenv_gem "hermes" do
   source "#{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
