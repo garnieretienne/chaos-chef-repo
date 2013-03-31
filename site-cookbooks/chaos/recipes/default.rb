@@ -145,7 +145,7 @@ git "hermes source" do
   group "git"
   action :checkout
 end
-rbenv_gem "hermes" do
+rbenv_gem "global::hermes" do
   source "#{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
   action :nothing
 end
