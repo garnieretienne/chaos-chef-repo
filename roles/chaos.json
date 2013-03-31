@@ -21,6 +21,9 @@
     },
     "gitolite": {
       "admin_home": "/srv/git"
+    },
+    "rbenv": {
+      "rubies": [ "1.9.3-p392" ]
     }
   },
   "json_class": "Chef::Role",
@@ -29,8 +32,8 @@
   "run_list": [
     "recipe[sudo]", 
     "recipe[build-essential]",
-    "recipe[ruby]",
-    "recipe[ruby::symlinks]",
+    "recipe[rbenv::system]",
+    "recipe[ruby_build]",
     "recipe[nginx]",
     "recipe[postgresql::server]",
     "recipe[gitolite]",
