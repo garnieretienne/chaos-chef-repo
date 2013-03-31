@@ -117,10 +117,10 @@ template "starter" do
 end
 
 # Install mason and foreman gems
-gem_package "foreman" do
+rbenv_gem "foreman" do
   action :install
 end
-gem_package "mason" do
+rbenv_gem "mason" do
   action :install
 end
 execute "add gem binary path to PATH and /usr/sbin for git user" do
@@ -154,7 +154,7 @@ execute "build hermes gem" do
   not_if "ls #{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
   notifies :install, "gem_package[hermes]", :immediately
 end
-gem_package "hermes" do
+rbenv_gem "hermes" do
   source "#{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
   action :nothing
 end
