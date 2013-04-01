@@ -8,7 +8,7 @@ app=$1
 
 DEPLOY_USER=git
 DEPLOY_GROUP=deploy
-STARTER_PATH=/srv/git/bin/starter2
+STARTER_PATH=/srv/git/bin/starter
 BUILD_DIR=/tmp/$app                          # Where app's build dir are stored
 GIT_REPO=~/repositories/${app}.git           # Where git bare repo are stored
 APP_HOME=/srv/app/$app                       # Where apps are stored
