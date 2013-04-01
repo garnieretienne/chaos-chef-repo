@@ -1,5 +1,5 @@
 #!/bin/bash
-source ~/etc/profile
+source /etc/profile
 source ~/.profile
 
 ~/bin/deploy $GL_REPO
