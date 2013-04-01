@@ -186,13 +186,17 @@ template "chaos.conf" do
   source "chaos.conf.erb"
   owner "root"
   group "root"
-  mode 00644
+  mode 0644
   notifies :reload, 'service[nginx]'
 end
 
 # Install buildpacks
 # Supported:
 # * ruby (https://github.com/heroku/heroku-buildpack-ruby.git)
+directory "#{node['chaos']['buildpacks']['dir']}" do
+  mode 0755
+  action :create
+end
 git "ruby buildpack" do
   repository "git://github.com/garnieretienne/hermes.git"
   destination "#{node['chaos']['buildpacks']['dir']}/ruby"
