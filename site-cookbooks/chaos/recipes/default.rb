@@ -117,12 +117,6 @@ template "starter" do
 end
 
 # Install mason and foreman gems
-rbenv_gem "foreman" do
-  action :install
-end
-# rbenv_gem "mason" do
-#   action :install
-# end
 execute "add gem binary path to PATH and /usr/sbin for git user" do
   command "echo \"PATH=$(ruby -rubygems -e 'puts Gem.default_bindir'):/usr/sbin:\\$PATH\" >> #{node['gitolite']['admin_home']}/.profile"
   cwd "#{node['gitolite']['admin_home']}"
@@ -130,6 +124,9 @@ execute "add gem binary path to PATH and /usr/sbin for git user" do
   group "git"
   action :run
   not_if "cat #{node['gitolite']['admin_home']}/.profile | grep \"$(ruby -rubygems -e 'puts Gem.default_bindir')\""
+end
+rbenv_gem "foreman" do
+  action :install
 end
 
 # Install chaos route manager gem (move to its own recipe)
@@ -191,4 +188,13 @@ template "chaos.conf" do
   group "root"
   mode 00644
   notifies :reload, 'service[nginx]'
+end
+
+# Install buildpacks
+# Supported:
+# * ruby (https://github.com/heroku/heroku-buildpack-ruby.git)
+git "ruby buildpack" do
+  repository "git://github.com/garnieretienne/hermes.git"
+  destination "#{node['chaos']['buildpacks_dir']}/ruby"
+  action :checkout
 end
