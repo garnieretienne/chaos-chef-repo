@@ -173,6 +173,16 @@ template "hermes sudo conf" do
   action :create
 end
 
+# Allow git user to manage app processes
+template "deploy sudo conf" do
+  path "/etc/sudoers.d/deploy"
+  source "sudo-deploy"
+  owner "root"
+  group "root"
+  mode "0440"
+  action :create
+end
+
 # Create the nginx config for chaos
 template "chaos.conf" do
   path "#{node['nginx']['dir']}/conf.d/chaos.conf"

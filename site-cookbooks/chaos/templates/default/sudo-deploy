@@ -1,0 +1,2 @@
+<%= node[:gitolite][:admin_name] %> ALL=(%deploy) SETENV: NOPASSWD: /srv/git/bin/starter
+<%= node[:gitolite][:admin_name] %> ALL=(%deploy) NOPASSWD: /bin/kill *
