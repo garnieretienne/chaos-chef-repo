@@ -195,6 +195,6 @@ end
 # * ruby (https://github.com/heroku/heroku-buildpack-ruby.git)
 git "ruby buildpack" do
   repository "git://github.com/garnieretienne/hermes.git"
-  destination "#{node['chaos']['buildpacks_dir']}/ruby"
+  destination "#{node['chaos']['buildpacks']['dir']}/ruby"
   action :checkout
 end
