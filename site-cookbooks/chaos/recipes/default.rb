@@ -198,7 +198,7 @@ directory "#{node['chaos']['buildpacks']['dir']}" do
   action :create
 end
 git "ruby buildpack" do
-  repository "git://github.com/garnieretienne/hermes.git"
+  repository "https://github.com/heroku/heroku-buildpack-ruby.git"
   destination "#{node['chaos']['buildpacks']['dir']}/ruby"
   action :checkout
 end
