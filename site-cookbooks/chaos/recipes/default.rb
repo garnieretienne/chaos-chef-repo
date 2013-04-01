@@ -120,9 +120,9 @@ end
 rbenv_gem "foreman" do
   action :install
 end
-rbenv_gem "mason" do
-  action :install
-end
+# rbenv_gem "mason" do
+#   action :install
+# end
 execute "add gem binary path to PATH and /usr/sbin for git user" do
   command "echo \"PATH=$(ruby -rubygems -e 'puts Gem.default_bindir'):/usr/sbin:\\$PATH\" >> #{node['gitolite']['admin_home']}/.profile"
   cwd "#{node['gitolite']['admin_home']}"

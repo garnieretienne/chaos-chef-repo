@@ -14,6 +14,7 @@ GIT_REPO=~/repositories/${app}.git           # Where git bare repo are stored
 APP_HOME=/srv/app/$app                       # Where apps are stored
 CACHE_DIR=$APP_HOME/cache
 PACKAGES_DIR=$APP_HOME/packages
+BUILDPACKS_DIR=/srv/git/.mason/buildpacks
 
 # Create the app build dir.
 # Clone a fresh copy of the app sources.
@@ -46,7 +47,11 @@ find_next_version_number(){
 build_app(){
   package_dir=$PACKAGES_DIR/$build_version
   create_build_dir
-  mason build $BUILD_DIR -o $package_dir -t dir -c $CACHE_DIR -q
+  
+  buildpack=ruby
+  ${BUILDPACKS_DIR}/${buildpack}/bin/compile $BUILD_DIR $CACHE_DIR
+  cp -r $BUILD_DIR $package_dir
+
   chown -R $DEPLOY_USER:$DEPLOY_GROUP $package_dir
   chmod -R 775 $package_dir
   destroy_build_dir
