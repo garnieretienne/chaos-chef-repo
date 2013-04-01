@@ -14,7 +14,7 @@ GIT_REPO=~/repositories/${app}.git           # Where git bare repo are stored
 APP_HOME=/srv/app/$app                       # Where apps are stored
 CACHE_DIR=$APP_HOME/cache
 PACKAGES_DIR=$APP_HOME/packages
-BUILDPACKS_DIR=/srv/git/.mason/buildpacks
+BUILDPACKS_DIR=/srv/git/buildpacks
 
 # Create the app build dir.
 # Clone a fresh copy of the app sources.
