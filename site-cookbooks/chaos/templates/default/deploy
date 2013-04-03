@@ -14,6 +14,16 @@ CACHE_DIR=$APP_HOME/cache                    # Where app's cache dir is stored
 PACKAGES_DIR=$APP_HOME/packages              # Where app's packaged version are stored
 BUILDPACKS_DIR=/srv/git/buildpacks           # Where buildpack are stored
 
+# Trap errors
+error(){
+  local script="$0"
+  local line="$1"
+  local exit_code="$2"
+  echo "${script}: line ${line}: exit with status code (${exit_code})"
+  exit $exit_code
+}
+trap 'error ${LINENO} ${$?}' ERR
+
 # Create the app build dir.
 # Clone a fresh copy of the app sources.
 create_build_dir(){
@@ -23,6 +33,11 @@ create_build_dir(){
   git clone $GIT_REPO $BUILD_DIR &> /dev/null
   rm -rf $BUILD_DIR/.git
   rm -f $BUILD_DIR/.gitignore
+
+  if [ ! -d "$BUILD_DIR" ]; then
+    echo "The build directory cannot be created"
+    error $LINENO 1
+  fi
 }
 
 # Destroy the app build dir.
@@ -38,6 +53,11 @@ find_next_version_number(){
     build_number=$(( $build_number+1 ))
   done
   build_version="v${build_number}"
+
+  if [ "$build_number" == "" ]; then
+    echo "No build version can be found."
+    error $LINENO 1
+  fi
 }
 
 # Detect a compatible buildpack.
@@ -55,16 +75,26 @@ detect_buildpack(){
       fi
     fi
   done
+
+  if [ "$buildpack" == "" ] || [ "$buildpack_name" == "" ]; then
+    echo "No buildpack found for this application (or the buildpack has not printed any framework name)"
+    error $LINENO 1
+  fi
 }
 
 # Build the app package.
 # Run buildpack and set permissions to be able to start the app.
 build_app(){
   package_dir=$PACKAGES_DIR/$build_version
-
   ${BUILDPACKS_DIR}/${buildpack}/bin/compile $BUILD_DIR $CACHE_DIR
-  cp -r $BUILD_DIR $package_dir
 
+  local exit_code=$?
+  if [[ $exit_code != 0 ]]; then
+    echo "Buildpack compilation failed"
+    error $LINENO $exit_code
+  fi
+
+  cp -r $BUILD_DIR $package_dir
   chown -R $DEPLOY_USER:$DEPLOY_GROUP $package_dir
   chmod -R 775 $package_dir
   destroy_build_dir
@@ -90,7 +120,7 @@ update_route(){
   fi
 }
 
-# Stop old running version and update the current link to
+# Stop old running version and update the current link to 
 # the running package dir.
 update_running_version(){
   if [ -f $PACKAGES_DIR/current/tmp/pids/starter.pid ]; then
