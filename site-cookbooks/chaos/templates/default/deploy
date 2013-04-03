@@ -1,20 +1,18 @@
 #!/bin/bash
-# git ALL=(%deploy) SETENV: NOPASSWD: /srv/git/bin/starter2
-# git ALL=(%deploy) NOPASSWD: /bin/kill *
 
 # Source profile to access rbenv (needed by mason)
 source ~/.profile
 app=$1
 
-DEPLOY_USER=git
-DEPLOY_GROUP=deploy
-STARTER_PATH=/srv/git/bin/starter
-BUILD_DIR=/tmp/$app                          # Where app's build dir are stored
+DEPLOY_USER=git                              # User used to deploy the app
+DEPLOY_GROUP=deploy                          # Shared group for file access
+STARTER_PATH=/srv/git/bin/starter            # Script to start the app
+BUILD_DIR=/tmp/$app                          # Where app's build is stored
 GIT_REPO=~/repositories/${app}.git           # Where git bare repo are stored
 APP_HOME=/srv/app/$app                       # Where apps are stored
-CACHE_DIR=$APP_HOME/cache
-PACKAGES_DIR=$APP_HOME/packages
-BUILDPACKS_DIR=/srv/git/buildpacks
+CACHE_DIR=$APP_HOME/cache                    # Where app's cache dir is stored
+PACKAGES_DIR=$APP_HOME/packages              # Where app's packaged version are stored
+BUILDPACKS_DIR=/srv/git/buildpacks           # Where buildpack are stored
 
 # Create the app build dir.
 # Clone a fresh copy of the app sources.
@@ -42,13 +40,28 @@ find_next_version_number(){
   build_version="v${build_number}"
 }
 
+# Detect a compatible buildpack.
+# Start buildpack/bin/detect in each buildpacks and stop at first compatible.
+detect_buildpack(){
+  create_build_dir
+  for folder in $BUILDPACKS_DIR/*; do
+    if [ -d $folder ]; then
+      if [ -f ${folder}/bin/detect ]; then
+        local detected=$(${folder}/bin/detect $BUILD_DIR)
+        if [[ $? == 0 ]]; then
+          buildpack_name=$detected
+          buildpack=$(basename $folder)
+        fi
+      fi
+    fi
+  done
+}
+
 # Build the app package.
 # Run buildpack and set permissions to be able to start the app.
 build_app(){
   package_dir=$PACKAGES_DIR/$build_version
-  create_build_dir
-  
-  buildpack=ruby
+
   ${BUILDPACKS_DIR}/${buildpack}/bin/compile $BUILD_DIR $CACHE_DIR
   cp -r $BUILD_DIR $package_dir
 
@@ -66,7 +79,6 @@ start_app(){
 }
 
 # Update NGINX route
-# TODO: find how to get the domain name (~/config ?).
 update_route(){
   local backends=( )
   domain=$(cat $APP_HOME/.domain)
@@ -78,7 +90,7 @@ update_route(){
   fi
 }
 
-# Stop old running version and update the current link to 
+# Stop old running version and update the current link to
 # the running package dir.
 update_running_version(){
   if [ -f $PACKAGES_DIR/current/tmp/pids/starter.pid ]; then
@@ -88,43 +100,16 @@ update_running_version(){
   ln -s $package_dir $PACKAGES_DIR/current
 }
 
-# Some test
-test(){
-  echo TEST [create_build_dir]
-  create_build_dir
-
-  echo TEST [destroy_build_dir]
-  destroy_build_dir
-
-  echo TEST [find_next_version_number]
-  find_next_version_number
-  echo "version: $build_version"
-
-  echo TEST [build_app]
-  find_next_version_number
-  build_app
-
-  echo TEST [start_app]
-  start_app
-  sleep 1
-  echo "Ports:"
-  cat $package_dir/tmp/ports
-
-  echo TEST [update_route]
-  update_route
-
-  echo TEST [update_running_version]
-  update_running_version
-}
-#test
-
+echo ""
 find_next_version_number
-echo "> Deploying $app $build_version"
-echo "> Building app..."
+echo "-----> Deploying $app ($build_version)"
+detect_buildpack
+echo "-----> Building app ($buildpack_name app detected)..."
 build_app
-echo "> Lauching..."
+echo "-----> Lauching..."
 start_app
 update_route
 update_running_version
-echo "> Application $app $build_version deployed."
-echo "  http://${domain}"
+echo "-----> Application $app ($build_version) deployed."
+echo "       http://${domain}"
+echo ""
