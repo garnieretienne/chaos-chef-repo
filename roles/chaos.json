@@ -33,6 +33,7 @@
     "recipe[sudo]", 
     "recipe[build-essential]",
     "recipe[ruby]",
+    "recipe[ruby::symlinks]",
     "recipe[ruby_build]",
     "recipe[rbenv::system]",
     "recipe[nginx]",
