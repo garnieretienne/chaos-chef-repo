@@ -33,6 +33,7 @@ create_build_dir(){
   git clone $GIT_REPO $BUILD_DIR &> /dev/null
   rm -rf $BUILD_DIR/.git
   rm -f $BUILD_DIR/.gitignore
+  rm -f $BUILD_DIR/.rbenv-version
 
   if [ ! -d "$BUILD_DIR" ]; then
     echo "The build directory cannot be created"
