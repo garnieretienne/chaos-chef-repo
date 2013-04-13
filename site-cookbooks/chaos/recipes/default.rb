@@ -136,22 +136,22 @@ directory "#{node['gitolite']['admin_home']}/build" do
   action :create
 end
 git "hermes source" do
-  repository "git://github.com/garnieretienne/hermes.git"
+  repository "git://github.com/garnieretienne/chaos_hermes.git"
   destination "#{node['gitolite']['admin_home']}/build/hermes"
   user "git"
   group "git"
   action :checkout
 end
 execute "build hermes gem" do
-  command "gem build hermes.gemspec"
+  command "gem build chaos_hermes.gemspec"
   cwd "#{node['gitolite']['admin_home']}/build/hermes"
   user "git"
   group "git"
   action :run
-  not_if "ls #{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
+  not_if "ls #{node['gitolite']['admin_home']}/build/hermes/chaos_hermes-0.0.1.gem"
 end
 rbenv_gem "hermes" do
-  source "#{node['gitolite']['admin_home']}/build/hermes/hermes-0.0.1.gem"
+  source "#{node['gitolite']['admin_home']}/build/hermes/chaos_hermes-0.0.1.gem"
   action :install
 end
 
