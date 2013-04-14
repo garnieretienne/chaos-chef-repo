@@ -63,18 +63,15 @@ template "starter" do
   action :create
 end
 
-# # Install mason and foreman gems
-# execute "add gem binary path to PATH and /usr/sbin for git user" do
-#   command "echo \"PATH=$(ruby -rubygems -e 'puts Gem.default_bindir'):/usr/sbin:\\$PATH\" >> #{node['gitolite']['admin_home']}/.profile"
-#   cwd "#{node['gitolite']['admin_home']}"
-#   user "git"
-#   group "git"
-#   action :run
-#   not_if "cat #{node['gitolite']['admin_home']}/.profile | grep \"$(ruby -rubygems -e 'puts Gem.default_bindir')\""
-# end
-# rbenv_gem "foreman" do
-#   action :install
-# end
+# Add /usr/sbin to the user path (where nginx is)
+execute "add /usr/sbin to PATH for git user" do
+  command "echo \"PATH=/usr/sbin:\\$PATH\" >> #{node['gitolite']['admin_home']}/.profile"
+  cwd "#{node['gitolite']['admin_home']}"
+  user "git"
+  group "git"
+  action :run
+  not_if "cat #{node['gitolite']['admin_home']}/.profile | grep \"PATH=/usr/sbin\""
+end
 
 # Install chaos route manager gem (move to its own recipe)
 directory "#{node['gitolite']['admin_home']}/build" do
