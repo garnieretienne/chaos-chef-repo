@@ -8,16 +8,16 @@
 #
 
 user "#{node['chaos']['servicepacks']['user']}" do
-  username node['chaos']['servicepacks']['user']
+  username "#{node['chaos']['servicepacks']['user']}"
   comment "Servicepacks user"
   shell "/bin/bash"
-  home node['chaos']['servicepacks']['dir']
+  home "#{node['chaos']['servicepacks']['dir']}"
   supports :manage_home=>true
   action :create
 end
 
 directory "#{node['chaos']['servicepacks']['dir']}" do
-  user node['chaos']['servicepacks']['user']
-  group node['chaos']['servicepacks']['user']
+  user "#{node['chaos']['servicepacks']['user']}"
+  group "#{node['chaos']['servicepacks']['user']}"
   action :create
 end
