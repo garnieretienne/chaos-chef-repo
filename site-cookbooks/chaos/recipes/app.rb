@@ -74,7 +74,7 @@ execute "add /usr/sbin to PATH for git user" do
 end
 
 # Generate keys to connect to service providers
-execute "ssh-keygen -q -t rsa"
+execute "ssh-keygen -q -t rsa" do
   cwd "#{node['gitolite']['admin_home']}"
   user "git"
   group "git"
