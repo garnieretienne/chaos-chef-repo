@@ -1,4 +1,4 @@
 {
-  "run_list": [ "role[chaos]" ]
+  "run_list": [ "role[app_server]" ]
 }
 

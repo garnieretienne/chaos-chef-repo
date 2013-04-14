@@ -1,0 +1,23 @@
+{
+  "name": "app_server",
+  "override_attributes": {
+    "gitolite": {
+      "admin_home": "/srv/git"
+    },
+    "rbenv": {
+      "rubies": [ "1.9.3-p392" ]
+    }
+  },
+  "json_class": "Chef::Role",
+  "description": "Install Chaos app server stack.",
+  "chef_type": "role",
+  "run_list": [
+    "role[server]",
+    "recipe[ruby_build]",
+    "recipe[rbenv::system]",
+    "recipe[nginx]",
+    "recipe[gitolite]",
+    "recipe[chaos::app]"
+   ]
+}
+

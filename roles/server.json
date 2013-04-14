@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "override_attributes": {
+    "authorization": {
+      "sudo": {
+        "groups": ["sudo"],
+        "include_sudoers_d": true
+      }
+    }, 
+    "languages": {
+      "ruby": {
+        "default_version": "1.9.1"
+      }
+    }
+  },
+  "json_class": "Chef::Role",
+  "description": "Install Chaos server stack.",
+  "chef_type": "role",
+  "run_list": [
+    "recipe[sudo]",
+    "recipe[build-essential]",
+    "recipe[ruby]",
+    "recipe[ruby::symlinks]",
+    "recipe[chaos::default]"
+   ]
+}
+
