@@ -73,6 +73,15 @@ execute "add /usr/sbin to PATH for git user" do
   not_if "cat #{node['gitolite']['admin_home']}/.profile | grep \"PATH=/usr/sbin\""
 end
 
+# Generate keys to connect to service providers
+execute "ssh-keygen -q -t rsa"
+  cwd "#{node['gitolite']['admin_home']}"
+  user "git"
+  group "git"
+  action :run
+  not_if "ls #{node['gitolite']['admin_home']}/.ssh/id_rsa.pub"
+end
+
 # Install chaos route manager gem (move to its own recipe)
 directory "#{node['gitolite']['admin_home']}/build" do
   user "git"
