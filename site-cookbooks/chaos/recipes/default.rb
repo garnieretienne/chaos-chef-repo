@@ -152,6 +152,7 @@ execute "build hermes gem" do
 end
 rbenv_gem "hermes" do
   source "#{node['gitolite']['admin_home']}/build/hermes/chaos_hermes-0.0.1.gem"
+  version "0.0.1"
   action :install
 end
 
