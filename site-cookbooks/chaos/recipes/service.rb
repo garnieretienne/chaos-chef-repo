@@ -12,7 +12,6 @@ user "#{node['chaos']['servicepacks']['user']}" do
   comment "Servicepacks user"
   shell "/bin/bash"
   home "#{node['chaos']['servicepacks']['dir']}"
-  supports :manage_home=>true
   action :create
 end
 
