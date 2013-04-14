@@ -1,0 +1,17 @@
+{
+  "name": "database",
+  "default_attributes": { 
+    "postgresql": {
+      "password": {
+        "postgres": "admin"
+      }
+    }
+  },
+  "json_class": "Chef::Role",
+  "description": "Install Chaos database stack.",
+  "chef_type": "role",
+  "run_list": [
+    "recipe[postgresql::server]"
+   ]
+}
+
