@@ -1,0 +1,10 @@
+{
+  "name": "service_provider",
+  "json_class": "Chef::Role",
+  "description": "Install Chaos service provider stack.",
+  "chef_type": "role",
+  "run_list": [
+    "role[server]",
+    "recipe[chaos::service]"
+   ]
+}

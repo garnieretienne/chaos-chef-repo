@@ -115,6 +115,13 @@ template "hermes sudo conf" do
   action :create
 end
 
+# Create the addons directory
+directory "#{node['gitolite']['admin_home']}/addons" do
+  user "git"
+  group "git"
+  action :create
+end
+
 # Allow git user to manage app processes
 template "deploy sudo conf" do
   path "/etc/sudoers.d/deploy"
