@@ -117,7 +117,7 @@ update_route(){
     backends=( "${backends[@]}" "127.0.0.1:${port}" )
   done < "$package_dir/tmp/ports"
   if (( ${#backends[@]} > 0 )); then
-    hermes update $app $domain --upstream "${backends[@]}" -d /srv/git/routes > /dev/null
+    hermes update $app $domain --upstream "${backends[@]}" --vhost-dir /srv/git/routes > /dev/null
   fi
 }
 
