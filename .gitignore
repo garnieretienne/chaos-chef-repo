@@ -1,1 +1,7 @@
 tmp
+roles/*
+!roles/app_server.json
+!roles/chaos.json
+!roles/database.json
+!roles/server.json
+!roles/service_provider.json
