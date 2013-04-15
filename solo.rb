@@ -1,12 +1,11 @@
+servicepacks_path      = "/srv/addons/servicepacks"
 servicepacks_cookbooks = []
-servicepacks_roles     = []
 
-Dir.foreach "" do |servicepack|
-  if File.directory?(servicepack) && servicepack != "." && servicepack != ".." && File.directory?("#{servicepack}/.git")
-    servicepacks_cookbooks << "#{servicepack}/chef/cookbooks"
-    servicepacks_roles << "#{servicepack}/chef/roles"
+Dir.foreach servicepacks_path do |servicepack|
+  if File.directory?("#{servicepacks_path}/#{servicepack}") && servicepack != "." && servicepack != ".." && File.directory?("#{servicepacks_path}/#{servicepack}/.git")
+    servicepacks_cookbooks << "#{servicepacks_path}/#{servicepack}/chef/cookbooks"
   end
 end
 
 cookbook_path [ "#{File.dirname(__FILE__)}/cookbooks", "#{File.dirname(__FILE__)}/site-cookbooks" ] + servicepacks_cookbooks
-role_path [ "#{File.dirname(__FILE__)}/roles" ] + servicepacks_roles
+role_path "#{File.dirname(__FILE__)}/roles"
