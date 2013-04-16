@@ -1,9 +1,11 @@
 servicepacks_path      = "/srv/addons/servicepacks"
 servicepacks_cookbooks = []
 
-Dir.foreach servicepacks_path do |servicepack|
-  if File.directory?("#{servicepacks_path}/#{servicepack}") && servicepack != "." && servicepack != ".." && File.directory?("#{servicepacks_path}/#{servicepack}/.git")
-    servicepacks_cookbooks << "#{servicepacks_path}/#{servicepack}/chef/cookbooks"
+if Dir.exist? servicepacks_path 
+  Dir.foreach servicepacks_path do |servicepack|
+    if File.directory?("#{servicepacks_path}/#{servicepack}") && servicepack != "." && servicepack != ".." && File.directory?("#{servicepacks_path}/#{servicepack}/.git")
+      servicepacks_cookbooks << "#{servicepacks_path}/#{servicepack}/chef/cookbooks"
+    end
   end
 end
 
