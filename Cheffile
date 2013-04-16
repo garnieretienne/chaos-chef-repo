@@ -5,7 +5,6 @@ site 'http://community.opscode.com/api/v1'
 
 cookbook 'sudo'
 cookbook 'nginx'
-cookbook 'postgresql'
 cookbook 'gitolite',
   :git => 'https://github.com/wschultz/cookbook-gitolite.git'
 cookbook 'ruby'
