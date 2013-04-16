@@ -179,7 +179,11 @@ create_needed_dirs
 (
 log "Start the application..."
 load_profile
-bind_env_files $HOME/app_env $HOME/.env $HOME/../../config/database $HOME/../../config/env
+local env_sources=( )
+for env_source in $HOME/../../config/*; do
+  env_sources+=("$env_source")
+done
+bind_env_files $HOME/app_env $HOME/.env ${env_sources[@]}
 run_procfile Procfile app_env
 
 # Kill sub-processes if a `SIGINT`, `SIGTERM` is received.
