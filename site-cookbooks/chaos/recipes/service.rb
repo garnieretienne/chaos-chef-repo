@@ -11,7 +11,7 @@ user "servicepacks user" do
   username "#{node['chaos']['servicepacks']['user']}"
   comment "Servicepacks user"
   shell "/bin/bash"
-  home "node['chaos']['servicepacks']['home']"
+  home "#{node['chaos']['servicepacks']['home']}"
   action :create
 end
 
