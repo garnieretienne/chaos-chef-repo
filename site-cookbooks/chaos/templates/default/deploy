@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Source profile to access rbenv (needed by mason)
-source ~/.profile
 app=$1
 
 DEPLOY_USER=git                              # User used to deploy the app
@@ -12,7 +10,9 @@ GIT_REPO=~/repositories/${app}.git           # Where git bare repo are stored
 APP_HOME=/srv/app/$app                       # Where apps are stored
 CACHE_DIR=$APP_HOME/cache                    # Where app's cache dir is stored
 PACKAGES_DIR=$APP_HOME/packages              # Where app's packaged version are stored
+CONFIG_DIR=$APP_HOME/config                  # Where app's env files are stored
 BUILDPACKS_DIR=/srv/git/buildpacks           # Where buildpack are stored
+ADDONS_DIR=/srv/git/addons                   # Where addons scripts are stored
 
 # Trap errors
 error(){
@@ -88,6 +88,7 @@ detect_buildpack(){
 build_app(){
   package_dir=$PACKAGES_DIR/$build_version
   ${BUILDPACKS_DIR}/${buildpack}/bin/compile $BUILD_DIR $CACHE_DIR
+  buildpack_metadata=$(${BUILDPACKS_DIR}/${buildpack}/bin/release $BUILD_DIR)
 
   local exit_code=$?
   if [[ $exit_code != 0 ]]; then
@@ -99,6 +100,40 @@ build_app(){
   chown -R $DEPLOY_USER:$DEPLOY_GROUP $package_dir
   chmod -R 775 $package_dir
   destroy_build_dir
+}
+
+# Search for an addon plan provider in the addons direcory.
+#
+# Arguments:
+#   addon: addon plan to find a provider for (ex: chaos-postgresql:basic)
+find_addon(){
+  local addon=$1
+  for addon_path in ${ADDONS_DIR}/*; do
+    if [ -f ${addon_path}/detect ]; then
+      detected=$(${addon_path}/detect $addon)
+      if [[ $? == 0 ]]; then
+        addon_provider="${addon_path}/gateway provide"
+        addon_name=$(basename $addon_path)
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
+# Extract addons from buildpack metadata and try to add them to the app.
+get_addons(){
+  addons=$(echo "$buildpack_metadata" | ruby -e "require 'yaml'; data=YAML.load(STDIN.read); puts data['addons'].join(\"\\n\")")
+  for addon_plan in "$addons" ; do
+    echo -n "       Asking for ${addon_plan} "
+    if find_addon $addon_plan; then
+      local addon_env=$($addon_provider $app $addon_plan)
+      echo $addon_env > "${CONFIG_DIR}/${addon_name}"
+      echo "(added)"
+    else
+      echo "(not found)"
+    fi
+  done
 }
 
 # Start the app.
@@ -137,6 +172,10 @@ echo "-----> Deploying $app ($build_version)"
 detect_buildpack
 echo "-----> Building app ($buildpack_name app detected)..."
 build_app
+if [ "$build_version" == "v0" ]; then
+  echo "-----> Get buildpack addons..."
+  get_addons
+fi
 echo "-----> Lauching..."
 start_app
 update_route
