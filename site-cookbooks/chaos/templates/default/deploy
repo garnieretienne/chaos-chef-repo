@@ -122,13 +122,14 @@ find_addon(){
 }
 
 # Extract addons from buildpack metadata and try to add them to the app.
+# Write env vars returning by the addon provider into the app config dir.
 get_addons(){
   addons=$(echo "$buildpack_metadata" | ruby -e "require 'yaml'; data=YAML.load(STDIN.read); puts data['addons'].join(\"\\n\")")
   for addon_plan in "$addons" ; do
     echo -n "       Asking for ${addon_plan} "
     if find_addon $addon_plan; then
       local addon_env=$($addon_provider $app $addon_plan)
-      echo $addon_env > "${CONFIG_DIR}/${addon_name}"
+      echo $addon_env > "${CONFIG_DIR}/${addon_name}" && chown $DEPLOY_USER:$DEPLOY_GROUP ${CONFIG_DIR}/${addon_name} && chmod 770 ${CONFIG_DIR}/${addon_name}
       echo "(added)"
     else
       echo "(not found)"
@@ -172,7 +173,7 @@ echo "-----> Deploying $app ($build_version)"
 detect_buildpack
 echo "-----> Building app ($buildpack_name app detected)..."
 build_app
-if [ "$build_version" == "v0" ]; then
+if [ "$build_version" == "v1" ]; then
   echo "-----> Get buildpack addons..."
   get_addons
 fi
