@@ -129,7 +129,7 @@ get_addons(){
     echo -n "       Asking for ${addon_plan} "
     if find_addon $addon_plan; then
       local addon_env=$($addon_provider $app $addon_plan)
-      echo $addon_env > "${CONFIG_DIR}/${addon_name}" && chown $DEPLOY_USER:$DEPLOY_GROUP ${CONFIG_DIR}/${addon_name} && chmod 770 ${CONFIG_DIR}/${addon_name}
+      echo $addon_env > "${CONFIG_DIR}/${addon_name}" && chown $DEPLOY_USER:$DEPLOY_GROUP ${CONFIG_DIR}/${addon_name} && chmod 660 ${CONFIG_DIR}/${addon_name}
       echo "(added)"
     else
       echo "(not found)"
