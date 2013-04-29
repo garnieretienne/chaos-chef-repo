@@ -63,9 +63,9 @@ if Dir.exist? admin_key then
   # See: http://www.dotdeb.org/about/
   template "dotdeb.list" do
     path "/etc/apt/sources.list.d/dotdeb.list"
-    source dotdeb.list
-    owner 'root'
-    group 'root'
+    source "dotdeb.list"
+    owner "root"
+    group "root"
     mode 0644
     action :create
     notifies :run, "execute[enable dotdeb repository]", :immediately
