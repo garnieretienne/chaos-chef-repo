@@ -58,4 +58,22 @@ if Dir.exist? admin_key then
       end
     end
   end
+
+  # Install Dotdeb repository
+  # See: http://www.dotdeb.org/about/
+  template "dotdeb.list" do
+    path "/etc/apt/sources.list.d/dotdeb.list"
+    source dotdeb.list
+    owner 'root'
+    group 'root'
+    mode 0644
+    action :create
+    notifies :run, "execute[enable dotdeb repository]", :immediately
+  end
+
+  # Download and register the dotdeb GPG key and update apt database
+  execute "enable dotdeb repository" do
+    command "wget http://www.dotdeb.org/dotdeb.gpg && cat dotdeb.gpg | apt-key add - && apt-get update"
+    action :nothing
+  end
 end
