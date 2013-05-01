@@ -163,3 +163,10 @@ git "ruby buildpack" do
   destination "#{node['chaos']['buildpacks']['dir']}/ruby"
   action :checkout
 end
+
+
+# Install some libraries
+# PostgreSQL client library
+package "libpq-dev" do
+  action :upgrade
+end
