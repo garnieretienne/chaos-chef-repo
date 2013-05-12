@@ -14,15 +14,15 @@ if Dir.exist? admin_key then
     if File.file? "#{admin_key}/#{entry}" and entry =~ /.*\.pub/ then
       user_name = entry.split(/(.*)\.pub/)[1]
       key = "#{admin_key}/#{entry}"
+      key_content = `cat #{admin_key}/#{entry}`.chomp
 
       user "admin #{user_name}" do
         username user_name
-        comment "Admin user"
+        comment "System Operator"
         shell "/bin/bash"
         home "/home/#{user_name}"
-        supports :manage_home=>true
+        supports :manage_home => true
         action :create
-        notifies :run, "execute[#{user_name} key]"
         notifies :run, "execute[ask #{user_name} to change its password on first login]"
       end
  
@@ -42,7 +42,8 @@ if Dir.exist? admin_key then
 
       execute "#{user_name} key" do
         command "cat #{key} >> /home/#{user_name}/.ssh/authorized_keys"
-        action :nothing
+        action :run
+        not_if "cat /home/#{user_name}/.ssh/authorized_keys | grep '#{key_content}'"
       end
 
       execute "ask #{user_name} to change its password on first login" do
